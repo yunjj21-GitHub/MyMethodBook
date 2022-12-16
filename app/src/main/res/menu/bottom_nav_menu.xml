@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/home"
+        android:enabled="true"
+        android:icon="@drawable/ic_home"
+        android:title="@string/home"/>
+    <item
+        android:id="@+id/money"
+        android:enabled="true"
+        android:icon="@drawable/ic_money"
+        android:title="@string/money"/>
+    <item
+        android:id="@+id/person"
+        android:enabled="true"
+        android:icon="@drawable/ic_person"
+        android:title="@string/person"/>
+    <item
+        android:id="@+id/chat"
+        android:enabled="true"
+        android:icon="@drawable/ic_chat"
+        android:title="@string/chat"/>
+</menu>

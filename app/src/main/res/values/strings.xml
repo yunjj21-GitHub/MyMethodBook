@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MyMethodBook</string>
+    <!-- Bottom Navigation Items -->
+    <string name="home">home</string>
+    <string name="money">money</string>
+    <string name="person">person</string>
+    <string name="chat">chat</string>
+</resources>
