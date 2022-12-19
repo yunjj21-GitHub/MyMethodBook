@@ -2,6 +2,7 @@ package com.example.mymethodbook.network
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 
 
 object APIClient {
@@ -10,5 +11,5 @@ object APIClient {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    var service: MyMethodService = retrofit.create(MyMethodService::class.java)
+    val apiInterface : APIInterface = retrofit.create(APIInterface::class.java)
 }

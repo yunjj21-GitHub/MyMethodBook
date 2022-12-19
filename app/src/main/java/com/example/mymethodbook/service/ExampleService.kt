@@ -1,4 +1,4 @@
-package com.example.mymethodbook
+package com.example.mymethodbook.service
 
 import android.app.*
 import android.app.PendingIntent.FLAG_MUTABLE
@@ -9,6 +9,16 @@ import android.os.*
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import com.example.mymethodbook.R
+import com.example.mymethodbook.MainActivity
+import com.example.mymethodbook.model.TestResponse
+import com.example.mymethodbook.network.APIClient
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Response
 
 class ExampleService : Service() {
     lateinit var thread : Thread
@@ -35,6 +45,7 @@ class ExampleService : Service() {
         thread = Thread(Runnable {
             for(i: Int in 1..100){
                 Log.e(TAG, "서비스 실햄 중")
+                // test()
                 try{
                     Thread.sleep(5000)
                 }catch (e:InterruptedException){
@@ -90,5 +101,20 @@ class ExampleService : Service() {
             .setContentIntent(pendingIntent)
             .setTicker("Ticker")
             .build()
+    }
+
+    /* 서버 통신 관련 메소드 */
+    // 임의의 API
+    fun test(){
+        val call: Call<TestResponse> = APIClient.apiInterface.test()
+        call.enqueue(object: retrofit2.Callback<TestResponse>{
+            override fun onResponse(call: Call<TestResponse>, response: Response<TestResponse>) {
+                Log.e(TAG, response.body().toString())
+            }
+
+            override fun onFailure(call: Call<TestResponse>, t: Throwable) {
+                Log.e(TAG, t.toString())
+            }
+        })
     }
 }

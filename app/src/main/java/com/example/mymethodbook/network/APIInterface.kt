@@ -4,7 +4,7 @@ import com.example.mymethodbook.model.TestResponse
 import retrofit2.Call
 import retrofit2.http.GET
 
-interface MyMethodService {
+interface APIInterface {
     @GET("/movie/readMovieList")
-    fun testApi() : Call<TestResponse>
+    fun test() : Call<TestResponse>
 }

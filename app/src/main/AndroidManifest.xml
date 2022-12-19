@@ -19,7 +19,11 @@
     <!-- 포그라운드 서비스 권한 설정 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
+    <!--
+    android:usesCleartextTraffic="true" // http 형식의 주소 접근 허용
+    -->
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -44,7 +48,7 @@
         </activity>
         <!-- 서비스 등록 -->
         <service
-            android:name=".ExampleService"
+            android:name=".service.ExampleService"
             android:exported="false"/>
     </application>
 

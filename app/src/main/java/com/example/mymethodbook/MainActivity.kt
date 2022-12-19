@@ -1,4 +1,4 @@
-package com.example.mymethodbook.ui
+package com.example.mymethodbook
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
@@ -23,10 +23,15 @@ import androidx.core.content.ContextCompat
 import com.example.mymethodbook.service.ExampleService
 import com.example.mymethodbook.R
 import com.example.mymethodbook.model.Movie
-import com.example.mymethodbook.network.RetrofitManager
+import com.example.mymethodbook.model.TestResponse
+import com.example.mymethodbook.network.APIClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Response
 import java.util.concurrent.Executor
@@ -67,15 +72,15 @@ class MainActivity : AppCompatActivity() {
         // 사용자 위치 정보 사용
         // getUserLocation()
 
+        /* 서버 통신 */
+        test()
+
         /* 백그라운드 동작 */
         /* startExampleService()
         val logoImage = findViewById<ImageView>(R.id.logoImage)
         logoImage.setOnClickListener {
             stopExampleService()
-        } */
-
-        /* 서버 통신 */
-        // readMovieList()
+        }*/
     }
 
     /* Bottom Navigation 관련 메소드 */
@@ -298,15 +303,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     /* 서버 통신 관련 메소드 */
-    fun readMovieList(){
-        val call: Call<List<Movie>> = RetrofitManager.service.readMovieList()
-        call.enqueue(object: retrofit2.Callback<List<Movie>>{
-            override fun onResponse(call: Call<List<Movie>>, response: Response<List<Movie>>) {
+    sealed class Result<out T: Any> {
+        data class Success<out T : Any>(val data: T) : Result<T>()
+        data class Error(val exception: Exception) : Result<Nothing>()
+    }
+
+    // 임의의 API
+    fun test(){
+        // Coroutine 사용
+
+
+        // Coroutine 미사용
+        val call: Call<TestResponse> = APIClient.apiInterface.test()
+        call.enqueue(object: retrofit2.Callback<TestResponse>{
+            override fun onResponse(call: Call<TestResponse>, response: Response<TestResponse>) {
                 Log.e(TAG, response.body().toString())
             }
 
-            override fun onFailure(call: Call<List<Movie>>, t: Throwable) {
-                Log.e(TAG, "readMovieList() 에러 발생")
+            override fun onFailure(call: Call<TestResponse>, t: Throwable) {
+                Log.e(TAG, t.toString())
             }
         })
     }

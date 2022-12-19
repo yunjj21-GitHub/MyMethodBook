@@ -1,9 +1,10 @@
 package com.example.mymethodbook.model
 
-data class Response(
+data class TestResponse(
     val message: String,
     val code: Int,
-    val resultType: String, "result":
+    val resultType: String,
+    val result: List<Movie>
 )
 
 data class Movie(
