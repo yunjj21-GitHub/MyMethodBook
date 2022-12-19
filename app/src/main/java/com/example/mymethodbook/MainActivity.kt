@@ -1,4 +1,4 @@
-package com.example.mymethodbook
+package com.example.mymethodbook.ui
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
@@ -20,10 +20,15 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import com.example.mymethodbook.service.ExampleService
+import com.example.mymethodbook.R
+import com.example.mymethodbook.model.Movie
+import com.example.mymethodbook.network.RetrofitManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import retrofit2.Call
+import retrofit2.Response
 import java.util.concurrent.Executor
 
 // Bottom Navigation Item 클릭시 업로드하는 웹페이지 목록
@@ -63,11 +68,14 @@ class MainActivity : AppCompatActivity() {
         // getUserLocation()
 
         /* 백그라운드 동작 */
-        startExampleService()
+        /* startExampleService()
         val logoImage = findViewById<ImageView>(R.id.logoImage)
         logoImage.setOnClickListener {
             stopExampleService()
-        }
+        } */
+
+        /* 서버 통신 */
+        // readMovieList()
     }
 
     /* Bottom Navigation 관련 메소드 */
@@ -287,6 +295,20 @@ class MainActivity : AppCompatActivity() {
         Intent(this, ExampleService::class.java).also{ intent ->
             stopService(intent)
         }
+    }
+
+    /* 서버 통신 관련 메소드 */
+    fun readMovieList(){
+        val call: Call<List<Movie>> = RetrofitManager.service.readMovieList()
+        call.enqueue(object: retrofit2.Callback<List<Movie>>{
+            override fun onResponse(call: Call<List<Movie>>, response: Response<List<Movie>>) {
+                Log.e(TAG, response.body().toString())
+            }
+
+            override fun onFailure(call: Call<List<Movie>>, t: Throwable) {
+                Log.e(TAG, "readMovieList() 에러 발생")
+            }
+        })
     }
 }
 
