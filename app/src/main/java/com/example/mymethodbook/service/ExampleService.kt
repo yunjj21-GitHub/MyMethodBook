@@ -56,6 +56,7 @@ class ExampleService : Service() {
         Toast.makeText(applicationContext, "Example Service 를 종료합니다.", Toast.LENGTH_LONG).show()
     }
 
+    /* Notification Channel 관련 메소드 */
     // Notification Channel 을 생성한다.
     @RequiresApi(Build.VERSION_CODES.O)
     fun createNotificationChannel() {
@@ -70,6 +71,7 @@ class ExampleService : Service() {
         notificationManager.createNotificationChannel(channel)
     }
 
+    // Notification 을 생성한다.
     @RequiresApi(Build.VERSION_CODES.O)
     fun createNotification() : Notification {
         val pendingIntent: PendingIntent =

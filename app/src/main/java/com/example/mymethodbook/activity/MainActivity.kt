@@ -26,6 +26,7 @@ import com.example.mymethodbook.R
 import com.example.mymethodbook.model.Movie
 import com.example.mymethodbook.model.TestResponse
 import com.example.mymethodbook.network.APIClient
+import com.example.mymethodbook.service.UserLocationTrackingAndShareService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -79,11 +80,11 @@ class MainActivity : AppCompatActivity() {
             }
         }*/
 
-        /* 백그라운드 동작 */
-        startExampleService()
+        /* 사용자 위치 트래킹 및 쉐어 기능 */
+        startUserLocationTrackingAndShareService()
         val logoImage = findViewById<ImageView>(R.id.logoImage)
         logoImage.setOnClickListener {
-            stopExampleService()
+            stopUserLocationTrackingAndShareService()
         }
     }
 
@@ -277,6 +278,7 @@ class MainActivity : AppCompatActivity() {
         locationPermissionRequest.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
+    /* 사용자 위치 정보 사용 관련 메소드 */
     // 사용자의 위치 정보를 가져온다. (위도와 경도)
     @SuppressLint("MissingPermission")
     fun getUserLocation(){
@@ -293,15 +295,15 @@ class MainActivity : AppCompatActivity() {
 
     /* 백그라운드 동작 관련 메소드 */
     // ExampleService 를 시작한다.
-    fun startExampleService(){
-        Intent(this, ExampleService::class.java).also { intent ->
+    fun startUserLocationTrackingAndShareService(){
+        Intent(this, UserLocationTrackingAndShareService::class.java).also { intent ->
             startService(intent)
         }
     }
 
     // ExampleService 를 종료한다.
-    fun stopExampleService(){
-        Intent(this, ExampleService::class.java).also{ intent ->
+    fun stopUserLocationTrackingAndShareService(){
+        Intent(this, UserLocationTrackingAndShareService::class.java).also{ intent ->
             stopService(intent)
         }
     }
