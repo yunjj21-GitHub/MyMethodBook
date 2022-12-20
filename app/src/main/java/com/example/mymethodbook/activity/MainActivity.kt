@@ -1,4 +1,4 @@
-package com.example.mymethodbook
+package com.example.mymethodbook.activity
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
@@ -13,6 +13,7 @@ import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
@@ -28,10 +29,7 @@ import com.example.mymethodbook.network.APIClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Response
 import java.util.concurrent.Executor
@@ -73,14 +71,20 @@ class MainActivity : AppCompatActivity() {
         // getUserLocation()
 
         /* 서버 통신 */
-        test()
+        // test()
+        /* CoroutineScope(Dispatchers.IO).launch {
+            while(true){
+                test()
+                delay(10000)
+            }
+        }*/
 
         /* 백그라운드 동작 */
-        /* startExampleService()
+        startExampleService()
         val logoImage = findViewById<ImageView>(R.id.logoImage)
         logoImage.setOnClickListener {
             stopExampleService()
-        }*/
+        }
     }
 
     /* Bottom Navigation 관련 메소드 */
@@ -303,27 +307,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     /* 서버 통신 관련 메소드 */
-    sealed class Result<out T: Any> {
-        data class Success<out T : Any>(val data: T) : Result<T>()
-        data class Error(val exception: Exception) : Result<Nothing>()
-    }
-
-    // 임의의 API
     fun test(){
-        // Coroutine 사용
-
-
-        // Coroutine 미사용
-        val call: Call<TestResponse> = APIClient.apiInterface.test()
-        call.enqueue(object: retrofit2.Callback<TestResponse>{
-            override fun onResponse(call: Call<TestResponse>, response: Response<TestResponse>) {
-                Log.e(TAG, response.body().toString())
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try{
+                APIClient.apiInterface.test()
+            }catch (e: Exception){
+                Log.e(TAG, "Network request failed")
             }
-
-            override fun onFailure(call: Call<TestResponse>, t: Throwable) {
-                Log.e(TAG, t.toString())
-            }
-        })
+            Log.e(TAG, "result in MainActivity : $result")
+        }
     }
 }
 

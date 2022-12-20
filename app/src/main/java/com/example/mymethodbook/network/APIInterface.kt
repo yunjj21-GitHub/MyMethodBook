@@ -6,5 +6,5 @@ import retrofit2.http.GET
 
 interface APIInterface {
     @GET("/movie/readMovieList")
-    fun test() : Call<TestResponse>
+    suspend fun test() : TestResponse
 }

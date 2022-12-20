@@ -10,18 +10,16 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.mymethodbook.R
-import com.example.mymethodbook.MainActivity
+import com.example.mymethodbook.activity.MainActivity
 import com.example.mymethodbook.model.TestResponse
 import com.example.mymethodbook.network.APIClient
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Response
+import java.lang.Runnable
 
 class ExampleService : Service() {
-    lateinit var thread : Thread
+    lateinit var repeatWorkJob : Job
     val NOTIFICATION_CHANNEL_ID = "1004"
     val NOTIFICATION_ID = 1000
 
@@ -41,19 +39,8 @@ class ExampleService : Service() {
             startForeground(NOTIFICATION_ID, notification)
         }
 
-        // 서비스 백그라운드 작업
-        thread = Thread(Runnable {
-            for(i: Int in 1..100){
-                Log.e(TAG, "서비스 실햄 중")
-                // test()
-                try{
-                    Thread.sleep(5000)
-                }catch (e:InterruptedException){
-                    break
-                }
-            }
-        })
-        thread.start()
+        // 백그라운드 작업
+        repeatWork()
 
         return START_STICKY
     }
@@ -65,7 +52,7 @@ class ExampleService : Service() {
 
     // 서비스를 더 이상 사용하지 않고 소멸시킬 때 실행된다.
     override fun onDestroy() {
-        thread.interrupt()
+        repeatWorkJob.cancel()
         Toast.makeText(applicationContext, "Example Service 를 종료합니다.", Toast.LENGTH_LONG).show()
     }
 
@@ -103,18 +90,25 @@ class ExampleService : Service() {
             .build()
     }
 
-    /* 서버 통신 관련 메소드 */
-    // 임의의 API
+    /* 서버 통신 관련 */
     fun test(){
-        val call: Call<TestResponse> = APIClient.apiInterface.test()
-        call.enqueue(object: retrofit2.Callback<TestResponse>{
-            override fun onResponse(call: Call<TestResponse>, response: Response<TestResponse>) {
-                Log.e(TAG, response.body().toString())
+        GlobalScope.launch(Dispatchers.IO) {
+            val result = try{
+                APIClient.apiInterface.test()
+            }catch(_:Exception){
+                Log.e(TAG, "Network request failed")
             }
+            Log.e(TAG, "result in ExampleService : $result")
+        }
+    }
 
-            override fun onFailure(call: Call<TestResponse>, t: Throwable) {
-                Log.e(TAG, t.toString())
-            }
-        })
+    /* 백그라운드 작업 관련 */
+    fun repeatWork(){
+       repeatWorkJob = GlobalScope.launch(Dispatchers.IO){
+           while(true){
+               test()
+               delay(10000)
+           }
+       }
     }
 }
