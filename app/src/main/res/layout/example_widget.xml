@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?android:attr/colorBackground"
+    android:theme="@style/Theme.Material3.DynamicColors.DayNight"
+    android:id="@+id/example_widget_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- 데이터 조회 -->
+    <TextView
+        android:textColor="@color/black"
+        android:id="@+id/remainingDataText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="데이터 조회"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="16dp"/>
+
+    <ProgressBar
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:progress="80"
+        android:id="@+id/remainingDataProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/remainingDataText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"/>
+    <!-- 음성 조회 -->
+    <TextView
+        android:textColor="@color/black"
+        android:id="@+id/remainingCallText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="음성 잔여"
+        android:layout_below="@+id/remainingDataProgress"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="16dp"/>
+
+    <ProgressBar
+        android:indeterminate="false"
+        android:progress="70"
+        android:id="@+id/remainingCallProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/remainingCallText"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="16dp"/>
+    <!-- SMS 조회 -->
+    <TextView
+        android:textColor="@color/black"
+        android:id="@+id/remainingSMSText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/remainingCallText"
+        android:text="SMS 잔여"
+        android:layout_below="@+id/remainingDataProgress"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="16dp" />
+
+    <ProgressBar
+        android:progress="20"
+        android:id="@+id/remainingSMSProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/remainingSMSText"
+        android:layout_toRightOf="@+id/remainingCallText"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="4dp" />
+    <!-- 알림 조회 -->
+    <ImageView
+        android:id="@+id/notificationImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_notifications"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/remainingCallProgress"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="16dp"/>
+
+    <TextView
+        android:textColor="@color/black"
+        android:id="@+id/notificationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="알림"
+        android:layout_below="@+id/remainingCallProgress"
+        android:layout_toRightOf="@+id/notificationImage"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="2dp"/>
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/notificationText"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp" />
+
+</RelativeLayout>

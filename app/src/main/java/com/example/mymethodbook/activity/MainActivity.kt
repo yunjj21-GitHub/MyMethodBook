@@ -286,7 +286,7 @@ class MainActivity : AppCompatActivity() {
 
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
             if (location != null) {
-                Log.e(TAG, location.longitude.toString() + " " + location.latitude.toString())
+                Log.e(TAG, "현재 사용자의 위치 : " + location.longitude.toString() + " " + location.latitude.toString())
             } else {
                 Log.e(TAG, "사용자 위치 정보 없음")
             }

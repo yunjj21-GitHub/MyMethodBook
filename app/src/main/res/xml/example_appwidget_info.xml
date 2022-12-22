@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:minWidth="180dp"
+    android:maxResizeWidth="180dp"
+    android:minHeight="110dp"
+    android:updatePeriodMillis="86400000"
+    android:previewImage="@drawable/ic_example_logo"
+    android:initialLayout="@layout/example_widget"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    tools:targetApi="s">
+    <!-- android:configure="" 생략함 -->
+</appwidget-provider>
