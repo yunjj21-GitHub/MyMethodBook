@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.widget.RemoteViews
+import com.example.mymethodbook.MyApplication
 import com.example.mymethodbook.R
 import com.example.mymethodbook.activity.MainActivity
 

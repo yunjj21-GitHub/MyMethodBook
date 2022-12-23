@@ -2,16 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
 
-    <!-- 네트워크 연결 권한 설정 -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- 생체 인식 정보 엑세스 권한 설정 -->
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" /> <!-- 위치 정보 엑세스 권한 설정 -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- 백그라운드에서 위치 정보 액세스 권한 설정 -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- 포그라운드 서비스 권한 설정 -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 네트워크 연결 권한 설정 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" /> <!-- 생체 인식 정보 엑세스 권한 설정 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- 대략적인 위치 정보 엑세스 권한 설정 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- 정확한 위치 정보 엑세스 권한 설정 -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- 백그라운드에서 위치 정보 액세스 권한 설정 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 포그라운드 서비스 권한 설정 -->
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -42,6 +42,8 @@
         <service
             android:name=".service.UserLocationTrackingAndShareService"
             android:exported="false" />
+        <service android:name=".service.ShackDetectionService"
+            android:exported="false"/>
         <!-- 위젯 등록 -->
         <receiver
             android:name=".widget.ExampleAppWidgetProvider"

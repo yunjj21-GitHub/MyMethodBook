@@ -30,8 +30,8 @@ class UserLocationTrackingAndShareService : Service() {
     lateinit var userLocationTrackingJob : Job
 
     // Notification Channel 및 Notification 관련 변수
-    private val N_C_I = "2000"
-    private val N_I = 2222
+    private val NOTIFICATION_CHANNEL_ID = "2000"
+    private val NOTIFICATION_ID = 2222
 
     // 사용자 위치 정보 사용 관련 변수
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -47,29 +47,28 @@ class UserLocationTrackingAndShareService : Service() {
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             createNotificationChannel()
-            startForeground(N_I, createNotification())
+            startForeground(NOTIFICATION_ID, createNotification())
         }
 
-        // trackAndShareUserLocation()
+        trackAndShareUserLocation()
 
         return START_STICKY
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         userLocationTrackingJob.cancel()
         Toast.makeText(applicationContext, "사용자 위치 트래킹 및 쉐어 기능을 중단합니다.", Toast.LENGTH_LONG).show()
-        super.onDestroy()
     }
 
-    /* Notification Channel 관련 메소드 */
+    /* Notification Channel & Notification 관련 메소드 */
     // Notification Channel 을 생성한다.
     @RequiresApi(Build.VERSION_CODES.O)
     fun createNotificationChannel() {
-        Log.e(TAG, "createNotificationChannel() 실행")
-        val name = "User Location Information Usage Notification"
-        val descriptionText = "User location information is used for location tracking and sharing functions."
+        val name = "백그라운드 위치 트래킹 및 쉐어"
+        val descriptionText = "앱이 사용자의 안전을 위해 백그라운드에서 사용자의 위치를 트래킹하고 쉐어하는 것을 동의할 수 있습니다."
         val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(N_C_I, name, importance).apply {
+        val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
             description = descriptionText
         }
         val notificationManager: NotificationManager =
@@ -91,9 +90,9 @@ class UserLocationTrackingAndShareService : Service() {
                 }
             }
 
-        return Notification.Builder(this, N_C_I)
-            .setContentTitle("Using your location information")
-            .setContentText("Using your location information to use location tracking and sharing functions.")
+        return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle("백그라운드 사용중")
+            .setContentText("우리 앱은 사용자의 안전을 위해 백그라운드에서 사용자 위치 트래킹 및 쉐어 작업을 하고 있습니다.")
             .setSmallIcon(R.drawable.ic_example_logo)
             .setContentIntent(pendingIntent)
             .build()
@@ -113,6 +112,7 @@ class UserLocationTrackingAndShareService : Service() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
+            Log.e(TAG, "허락된 위치 정보 접근 권한이 없습니다.")
             stopSelf()
             return
         }

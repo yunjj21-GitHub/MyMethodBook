@@ -2,7 +2,13 @@ package com.example.mymethodbook.activity
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.Sensor.TYPE_ALL
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +32,7 @@ import com.example.mymethodbook.R
 import com.example.mymethodbook.model.Movie
 import com.example.mymethodbook.model.TestResponse
 import com.example.mymethodbook.network.APIClient
+import com.example.mymethodbook.service.ShackDetectionService
 import com.example.mymethodbook.service.UserLocationTrackingAndShareService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -48,6 +55,7 @@ private lateinit var promptInfo : BiometricPrompt.PromptInfo
 
 // 사용자 위치 정보 사용 관련 변수
 private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+private lateinit var sensorManager: SensorManager
 
 class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.R)
@@ -82,9 +90,14 @@ class MainActivity : AppCompatActivity() {
 
         /* 사용자 위치 트래킹 및 쉐어 기능 */
         startUserLocationTrackingAndShareService()
+
+        /* 흔들림 감지 기능 */
+        startShackDetectionService()
+
         val logoImage = findViewById<ImageView>(R.id.logoImage)
         logoImage.setOnClickListener {
             stopUserLocationTrackingAndShareService()
+            stopShackDetectionService()
         }
     }
 
@@ -293,17 +306,32 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /* 백그라운드 동작 관련 메소드 */
-    // ExampleService 를 시작한다.
+    /* 사용자 위치 트래킹 및 쉐어 기능 관련 메소드 */
+    // UserLocationTrackingAndShareService 를 시작한다.
     fun startUserLocationTrackingAndShareService(){
         Intent(this, UserLocationTrackingAndShareService::class.java).also { intent ->
             startService(intent)
         }
     }
 
-    // ExampleService 를 종료한다.
+    // UserLocationTrackingAndShareService 를 종료한다.
     fun stopUserLocationTrackingAndShareService(){
         Intent(this, UserLocationTrackingAndShareService::class.java).also{ intent ->
+            stopService(intent)
+        }
+    }
+
+    /* 흔들림 감지 관련 메소드 */
+    // UserLocationTrackingAndShareService 를 시작한다.
+    fun startShackDetectionService(){
+        Intent(this, ShackDetectionService::class.java).also { intent ->
+            startService(intent)
+        }
+    }
+
+    // UserLocationTrackingAndShareService 를 종료한다.
+    fun stopShackDetectionService(){
+        Intent(this, ShackDetectionService::class.java).also{ intent ->
             stopService(intent)
         }
     }
