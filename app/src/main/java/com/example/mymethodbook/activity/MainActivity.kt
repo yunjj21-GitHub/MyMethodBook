@@ -1,9 +1,13 @@
 package com.example.mymethodbook.activity
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.Sensor.TYPE_ALL
 import android.hardware.SensorEvent
@@ -18,6 +22,7 @@ import android.util.Log
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +31,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.mymethodbook.service.ExampleService
 import com.example.mymethodbook.R
@@ -36,7 +43,9 @@ import com.example.mymethodbook.service.ShackDetectionService
 import com.example.mymethodbook.service.UserLocationTrackingAndShareService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Response
@@ -58,7 +67,6 @@ private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 private lateinit var sensorManager: SensorManager
 
 class MainActivity : AppCompatActivity() {
-    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -89,16 +97,28 @@ class MainActivity : AppCompatActivity() {
         }*/
 
         /* 사용자 위치 트래킹 및 쉐어 기능 */
-        startUserLocationTrackingAndShareService()
+        // startUserLocationTrackingAndShareService()
 
         /* 흔들림 감지 기능 */
         startShackDetectionService()
 
         val logoImage = findViewById<ImageView>(R.id.logoImage)
         logoImage.setOnClickListener {
-            stopUserLocationTrackingAndShareService()
+            // stopUserLocationTrackingAndShareService()
             stopShackDetectionService()
         }
+
+        /* notification 관련 */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkAndGetNotificationPermission()
+        }
+        // createNotificationChannel()
+        // postNotification()
+
+        /* FCM 관련 메소드 */
+        getUsersFCMToken()
+        subscribeAdvertisement()
+        subscribeNotice()
     }
 
     /* Bottom Navigation 관련 메소드 */
@@ -346,6 +366,104 @@ class MainActivity : AppCompatActivity() {
             }
             Log.e(TAG, "result in MainActivity : $result")
         }
+    }
+
+    /* Notification 관련 메소드 */
+    val NOTIFICATION_CHANNEL_ID = "5000"
+    val NOTIFICATION_ID = 5555
+    // notification 권한이 있는지 확인한다.
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    fun checkAndGetNotificationPermission(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED) {
+            return
+        } else {
+            getNotificationPermission()
+        }
+    }
+
+    // 사용자에게 notification 권한을 요청한다.
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    fun getNotificationPermission(){
+        val requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) { // notification 공지 허락
+                Log.e(TAG, "notification 권한 허락")
+            } else { // notification 공지 거절
+                Log.e(TAG, "notification 권한 거절")
+            }
+        }
+
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    // notification channel 을 생성한다.
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "name"
+            val descriptionText = "contnet"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    // notification 을 띄운다.
+    fun postNotification(){
+        val button = findViewById<Button>(R.id.testButton)
+        button.setOnClickListener {
+            val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_money)
+                .setContentTitle("테스트 공지")
+                .setContentText("반갑습니다. 테스트 공지입니다.")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+            with(NotificationManagerCompat.from(this)){
+                notify(NOTIFICATION_ID, builder.build())
+            }
+        }
+    }
+
+    /* FCM 관련 메소드 */
+    // token 을 가져온다.
+    fun getUsersFCMToken(){
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+            val token = task.result
+            Log.e(TAG, "FCM token : $token")
+        })
+    }
+
+    // 광고를 구독한다.
+    fun subscribeAdvertisement(){
+        FirebaseMessaging.getInstance().subscribeToTopic("Advertisement")
+            .addOnCompleteListener { task ->
+                var result = "Subscribed to the advertisement"
+                if(!task.isSuccessful){
+                    result = "Advertisement subscribe failed"
+                }
+                Log.e(TAG, result)
+            }
+    }
+
+    // 공지를 구독한다.
+    fun subscribeNotice(){
+        FirebaseMessaging.getInstance().subscribeToTopic("Notice")
+            .addOnCompleteListener { task ->
+                var result = "Subscribed to the notice"
+                if(!task.isSuccessful){
+                    result = "Notice subscribe failed"
+                }
+                Log.e(TAG, result)
+            }
     }
 }
 

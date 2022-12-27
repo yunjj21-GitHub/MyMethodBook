@@ -6,8 +6,12 @@ import retrofit2.create
 
 
 object APIClient {
-    var retrofit = Retrofit.Builder()
-        .baseUrl("http://boostcourse-appapi.connect.or.kr:10000")
+    /*val retrofit = Retrofit.Builder()
+        .baseUrl("https://fcm.googleapis.com/fcm/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()*/
+    val retrofit = Retrofit.Builder()
+        .baseUrl("http://boostcourse-appapi.connect.or.kr:10000/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

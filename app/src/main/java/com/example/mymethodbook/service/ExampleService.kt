@@ -86,7 +86,7 @@ class ExampleService : Service() {
         return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("example notification")
             .setContentText("This is just example notification.")
-            .setSmallIcon(R.drawable.logo)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .setTicker("Ticker")
             .build()

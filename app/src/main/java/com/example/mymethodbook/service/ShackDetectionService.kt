@@ -5,7 +5,6 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
-import android.hardware.Sensor.TYPE_ALL
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
@@ -15,7 +14,11 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.mymethodbook.R
 import com.example.mymethodbook.activity.MainActivity
-import java.lang.reflect.Type
+import com.example.mymethodbook.model.Message
+import com.example.mymethodbook.network.APIClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.Objects
 import kotlin.math.sqrt
 
@@ -99,7 +102,7 @@ class ShackDetectionService : Service() {
         return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("백그라운드 사용중")
             .setContentText("우리 앱은 사용자의 안전을 위해 백그라운드에서 충격 감지 작업을 하고 있습니다.")
-            .setSmallIcon(R.drawable.ic_example_logo)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .build()
     }
@@ -120,6 +123,20 @@ class ShackDetectionService : Service() {
 
             if(acceleration > 45){
                 Log.e(TAG, "Shaking detected.")
+                /*GlobalScope.launch (Dispatchers.IO){
+                    val token = "d_E2-QA9Qd--Pfje4YIYHQ:APA91bEFXlqbDcfqPbQvhzGIaNf9XZRfXiKg8xO-jUN5OxwvQXOW3-IbCCClRHlYFHV8dkccguAapT1UE91S6v7mtpCibNtvclWcKwrV4D081gGACrTBoVxgslS08aehfk-_I236pS62"
+                    val result = try {
+                        APIClient.apiInterface.notifyToParents(
+                            message = Message(to = token, com.example.mymethodbook.model.Notification(
+                                title = "FCM 테스트",
+                                body = "FCM 테스트입니다.",
+                                image = null
+                            ))
+                        )
+                    }catch (errorCode: Exception){
+                        Log.e(TAG, errorCode.toString())
+                    }
+                }*/
             }
         }
 

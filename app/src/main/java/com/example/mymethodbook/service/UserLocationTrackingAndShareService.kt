@@ -93,7 +93,7 @@ class UserLocationTrackingAndShareService : Service() {
         return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("백그라운드 사용중")
             .setContentText("우리 앱은 사용자의 안전을 위해 백그라운드에서 사용자 위치 트래킹 및 쉐어 작업을 하고 있습니다.")
-            .setSmallIcon(R.drawable.ic_example_logo)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .build()
     }

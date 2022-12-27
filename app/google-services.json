@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "983330414902",
+    "project_id": "mymethodbook",
+    "storage_bucket": "mymethodbook.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983330414902:android:6e7c8b294796862514d397",
+        "android_client_info": {
+          "package_name": "com.example.mymethodbook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "983330414902-meovsiv635cc8tpfmc63jtk7gltkb92a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mymethodbook",
+            "certificate_hash": "4f273fd31b8ff33da7085f88fc06eb763f435426"
+          }
+        },
+        {
+          "client_id": "983330414902-vub0br8fu6n82o119biv4pq4crquolk3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsHliNviVG5GMnMhLSkLQCZRPq2Vb4O1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983330414902-vub0br8fu6n82o119biv4pq4crquolk3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
