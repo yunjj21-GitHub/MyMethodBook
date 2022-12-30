@@ -8,14 +8,10 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.hardware.Sensor
-import android.hardware.Sensor.TYPE_ALL
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
+import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -24,9 +20,10 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
@@ -34,10 +31,8 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.example.mymethodbook.service.ExampleService
+import androidx.core.net.toUri
 import com.example.mymethodbook.R
-import com.example.mymethodbook.model.Movie
-import com.example.mymethodbook.model.TestResponse
 import com.example.mymethodbook.network.APIClient
 import com.example.mymethodbook.service.ShackDetectionService
 import com.example.mymethodbook.service.UserLocationTrackingAndShareService
@@ -45,17 +40,26 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData
+import com.google.firebase.dynamiclinks.ktx.*
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Response
+import java.net.URI
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.concurrent.Executor
 
 // Bottom Navigation Item 클릭시 업로드하는 웹페이지 목록
 const val webpage1 = "https://www.webpage1"
-const val webpage2 = "https://www.webpage2"
+const val webpage2 = "https//www.webpage2"
 const val webpage3 = "https://www.webpage3"
 const val webpage4 = "https://www.webpage4"
+
+// Firebase Dynamic Link 관련 변수
+const val domainPrefix = "https://mymethodbook.page.link"
+const val deeplinkForOpeningTheWebpage2 = "https://mymethodbook.page.link/webpage2"
 
 // 생체 인식 인증 관련 변수
 private lateinit var executor: Executor
@@ -67,12 +71,20 @@ private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 private lateinit var sensorManager: SensorManager
 
 class MainActivity : AppCompatActivity() {
+    lateinit var btmNav : BottomNavigationView
+    lateinit var resultText : TextView
+    lateinit var testBtn : Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        btmNav = findViewById<BottomNavigationView>(R.id.btmNav)
+        resultText = findViewById<TextView>(R.id.resultText)
+        testBtn = findViewById<Button>(R.id.testButton)
+
         initBottomNav()
-        loadWebPage(webpage1)
+        setWebPage(webpage1)
 
         /* 생체 인식 인증 */
         // initBiometricPrompt()
@@ -100,12 +112,12 @@ class MainActivity : AppCompatActivity() {
         // startUserLocationTrackingAndShareService()
 
         /* 흔들림 감지 기능 */
-        startShackDetectionService()
+        // startShackDetectionService()
 
         val logoImage = findViewById<ImageView>(R.id.logoImage)
         logoImage.setOnClickListener {
             // stopUserLocationTrackingAndShareService()
-            stopShackDetectionService()
+            // stopShackDetectionService()
         }
 
         /* notification 관련 */
@@ -115,32 +127,43 @@ class MainActivity : AppCompatActivity() {
         // createNotificationChannel()
         // postNotification()
 
-        /* FCM 관련 메소드 */
+        /* FCM 관련 */
         getUsersFCMToken()
         subscribeAdvertisement()
         subscribeNotice()
+
+        /* Firebase Dynamic Link 관련 */
+        val postId = "1234"
+        listenDynamicLink()
+        testBtn.setOnClickListener {
+            generateSharingLink(
+                "${domainPrefix}/post/${postId}".toUri(),
+                previewImageLink = "https://blog.branch.io/ko/wp-content/uploads/2017/01/android-image.png".toUri()
+            ) { generatedLink ->
+               Log.e(TAG, generatedLink.toString())
+            }
+        }
     }
 
     /* Bottom Navigation 관련 메소드 */
     // Bottom Navigation 의 초기설정을 한다.
     fun initBottomNav() {
-        val btmNav = findViewById<BottomNavigationView>(R.id.btmNav)
         btmNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.home -> {
-                    loadWebPage(webpage1)
+                    setWebPage(webpage1)
                     true
                 }
                 R.id.money -> {
-                    loadWebPage(webpage2)
+                    setWebPage(webpage2)
                     true
                 }
                 R.id.person -> {
-                    loadWebPage(webpage3)
+                    setWebPage(webpage3)
                     true
                 }
                 R.id.chat -> {
-                    loadWebPage(webpage4)
+                    setWebPage(webpage4)
                     true
                 }
                 else -> false
@@ -187,7 +210,7 @@ class MainActivity : AppCompatActivity() {
 
     /* WebView 관련 메소드 */
     // WebView 에 URL 에 해당하는 웹페이지를 로드한다.
-    fun loadWebPage(URL: String) {
+    fun setWebPage(URL: String) {
         val webView = findViewById<WebView>(R.id.webView)
         webView.webViewClient = WebViewClient() // 웹페이지를 앱 외부에서 띄우지 않도록 설정
         webView.loadUrl(URL)
@@ -202,12 +225,6 @@ class MainActivity : AppCompatActivity() {
         executor = ContextCompat.getMainExecutor(this)
         biometricPrompt = BiometricPrompt(this, executor,
             object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(
-                    errorCode: Int,
-                    errString: CharSequence
-                ) {
-                    super.onAuthenticationError(errorCode, errString)
-                }
 
                 override fun onAuthenticationSucceeded(
                     result: BiometricPrompt.AuthenticationResult
@@ -464,6 +481,69 @@ class MainActivity : AppCompatActivity() {
                 }
                 Log.e(TAG, result)
             }
+    }
+
+    /* Firebase Dynamic Link 관련 메소드 */
+    // Deeplink 수신한다.
+    fun listenDynamicLink() {
+        FirebaseDynamicLinks.getInstance()
+            .getDynamicLink(intent)
+            .addOnSuccessListener(this) { pendingDynamicLinkData ->
+                var deepLink: Uri? = null
+
+                if (pendingDynamicLinkData != null) {
+                    deepLink = pendingDynamicLinkData.link
+                }
+
+                deepLink?.let { uri ->
+                    val path = uri.toString().substring(deepLink.toString().lastIndexOf("/") + 1)
+
+                    when {
+                        uri.toString().contains("post") -> {
+                            val postId = path
+                            Log.e(TAG, "Post id : ${postId} 포스트로 이동합니다.")
+                        }
+                    }
+                }
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "handleIncomingDeepLinks: ${it.message}")
+            }
+    }
+
+    // Deeplink 생성한다.
+    fun generateSharingLink(
+        deepLink: Uri,
+        previewImageLink: Uri,
+        getShareableLink: (String) -> Unit = {}
+    ){
+        FirebaseDynamicLinks.getInstance().createDynamicLink().run{
+            link = deepLink
+            domainUriPrefix = domainPrefix
+            androidParameters {
+                // minimumVersion = Build.VERSION_CODES.N
+                build()
+            }
+
+            socialMetaTagParameters {
+                title = "MyMethodBook을 사용하고 놀라운 경험을!"
+                description = "MyMethodBook은 매일 당신에게 새로운 경험을 선물합니다."
+                imageUrl = previewImageLink
+                build()
+            }
+
+            buildShortDynamicLink()
+        }.also {
+            it.addOnSuccessListener { dynamicLink ->
+                Log.e(TAG, "성공")
+
+                getShareableLink.invoke(dynamicLink.shortLink.toString())
+            }
+
+            it.addOnFailureListener {
+                Log.e(TAG, "실패")
+            }
+        }
     }
 }
 
