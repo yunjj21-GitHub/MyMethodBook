@@ -4,6 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.ActivityNotFoundException
+import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
@@ -41,14 +43,9 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
-import com.google.firebase.dynamiclinks.PendingDynamicLinkData
 import com.google.firebase.dynamiclinks.ktx.*
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.*
-import java.net.URI
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.concurrent.Executor
 
 // Bottom Navigation Item 클릭시 업로드하는 웹페이지 목록
@@ -59,7 +56,9 @@ const val webpage4 = "https://www.webpage4"
 
 // Firebase Dynamic Link 관련 변수
 const val domainPrefix = "https://mymethodbook.page.link"
-const val deeplinkForOpeningTheWebpage2 = "https://mymethodbook.page.link/webpage2"
+
+// URI Scheme 관련 변수 (이 앱을 호출하는 다른 앱에 작성한다.)
+const val mymethodbookSchemePrefix = "mymethodbook://app"
 
 // 생체 인식 인증 관련 변수
 private lateinit var executor: Executor
@@ -133,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         subscribeNotice()
 
         /* Firebase Dynamic Link 관련 */
-        val postId = "1234"
+        /* val postId = "1234"
         listenDynamicLink()
         testBtn.setOnClickListener {
             generateSharingLink(
@@ -142,7 +141,60 @@ class MainActivity : AppCompatActivity() {
             ) { generatedLink ->
                Log.e(TAG, generatedLink.toString())
             }
+        }*/
+
+        /* URI Scheme 관련 */
+        readDataFromIncomingIntents()
+    }
+
+    /* URI Scheme 관련 */
+    // App calls another app by URI scheme. (이 앱을 호출하는 다른 앱에 작성한다.)
+    fun appCallsAnotherAppByURIScheme() {
+        val userId = "yunjj21@gmail.com"
+        val ssoToken = "this123is456a789token123that456secret789info123"
+        testBtn.setOnClickListener {
+            val generatedScheme = generateSharingScheme(userId, ssoToken)
+            val callMyMethodBookIntent = Intent(Intent.ACTION_VIEW, generatedScheme)
+            try {
+                startActivity(callMyMethodBookIntent)
+            } catch (e: ActivityNotFoundException) {
+                Log.e(TAG, e.message.toString())
+            }
         }
+    }
+
+    // App calls web by URL.
+    fun appCallsWebByURL(){
+        testBtn.setOnClickListener {
+            val webIntent: Intent = Uri.parse("https://github.com/yunjj21-GitHub").let{ webpage ->
+                Intent(Intent.ACTION_VIEW, webpage)
+            }
+
+            try{
+                startActivity(webIntent)
+            }catch (e: ActivityNotFoundException){
+                Log.e(TAG, e.message.toString())
+            }
+        }
+    }
+
+    // URI Scheme 을 생성한다. (이 앱을 호출하는 다른 앱에 작성한다.)
+    fun generateSharingScheme(userId : String, ssoToken : String) : Uri {
+        return "${mymethodbookSchemePrefix}?userId=${userId}&ssoToken=${ssoToken}".toUri()
+    }
+
+    // Intent 로부터 데이터를 가져온다.
+    fun readDataFromIncomingIntents(){
+        val action: String? = intent?.action
+        val uri: Uri? = intent?.data
+
+        if(action != Intent.ACTION_VIEW) return
+        if(uri == null) return
+
+        val userId = uri.getQueryParameter("userId")
+        val ssoToken = uri.getQueryParameter("ssoToken")
+
+        Log.e(TAG, "userId : ${userId}, ssoToken = ${ssoToken}")
     }
 
     /* Bottom Navigation 관련 메소드 */

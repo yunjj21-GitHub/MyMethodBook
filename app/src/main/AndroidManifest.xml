@@ -39,7 +39,11 @@
                 <data
                     android:host="mymethodbook.page.link"
                     android:scheme="https" />
+                <data
+                    android:scheme="mymethodbook"
+                    android:host="app"/>
             </intent-filter>
+
 
             <meta-data
                 android:name="android.app.lib_name"
